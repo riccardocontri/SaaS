@@ -9,11 +9,9 @@ class MoviesController < ApplicationController
   def index
     #debugger
     @all_ratings = Movie.all_ratings
-    #@movies = Movie.all :order => params[:order_by]
-    #@movies = Movie.where :rating => params[:ratings].keys, :order => params[:order_by]
-    @selected_ratings = [] if @selected_ratings.nil?
-    @selected_ratings = params[:ratings].keys unless params[:ratings].nil?
-    @movies = Movie.find_all_by_rating(@selected_ratings, :order => params[:order_by])
+    @selected_ratings = {} if @selected_ratings.nil?
+    @selected_ratings = params[:ratings] unless params[:ratings].nil?
+    @movies = Movie.find_all_by_rating(@selected_ratings.keys, :order => params[:order_by])
     @ordered_by = params[:order_by]
   end
 
