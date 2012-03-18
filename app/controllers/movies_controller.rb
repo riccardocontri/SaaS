@@ -12,36 +12,30 @@ class MoviesController < ApplicationController
 
     @all_ratings = Movie.all_ratings
 
-    #@selected_ratings = params[:ratings] unless params[:ratings].nil?
-    #@selected_ratings = (params[:ratings].nil?) ? session[:ratings] : params[:ratings]
-    if params[:ratings].nil?
-        redirect_needed = true
-        @selected_ratings = session[:ratings]
-    else
-        @selected_ratings = params[:ratings]
+    if session[:ratings].nil?
+        session[:ratings] = {}
+        @all_ratings.each { |r| session[:ratings][r] = 1 }
     end
 
-    if @selected_ratings.nil?
-        @selected_ratings = {}
-        @all_ratings.each { |r| @selected_ratings[r] = 1 }
+    if session[:order_by].nil?
+        session[:order_by] = "title"
     end
 
-    #@ordered_by = params[:order_by] unless params[:order_by].nil?
-    #@ordered_by = (params[:order_by].nil?) ? session[:order_by] : params[:order_by]
-    if params[:order_by].nil?
-        redirect_needed = true
-        @ordered_by = session[:order_by]
-    else
-        @ordered_by = params[:order_by]
+    new_params = {}
+    params.each { |key, val| new_params[key] = val }
+    [:ratings, :order_by].each do |key|
+        if params[key].nil?
+            redirect_needed = true
+            new_params[key] = session[key]
+        else
+            session[key] = params[key]
+        end
     end
-
-    session[:ratings] = @selected_ratings
-    session[:order_by] = @ordered_by
 
     if redirect_needed
-        redirect_to movies_path(:order_by => @ordered_by, :ratings => @selected_ratings)
+        redirect_to movies_path(new_params)
     else
-        @movies = Movie.find_all_by_rating(@selected_ratings.keys, :order => @ordered_by)
+        @movies = Movie.find_all_by_rating(session[:ratings].keys, :order => session[:order_by])
     end
   end
 
